@@ -31,12 +31,21 @@ class Bus(models.Model):
 
     capacidad = models.IntegerField()
 
+    def __str__(self):
+        return f"Bus({self.chofer})"
+
+    class Meta:
+        verbose_name_plural = "Buses"
+
 
 class Trayecto(models.Model):
     
     nombre = models.CharField(max_length=100)
 
     duracion = models.DurationField()
+
+    def __str__(self):
+        return f"Trayecto({self.nombre})"
 
 
 class Asiento(models.Model):
@@ -59,6 +68,10 @@ class Asiento(models.Model):
 
     estado = models.IntegerField(choices=ESTADOS, default=DISPONIBLE)
 
+    def reservar(self):
+        self.estado = self.RESERVADO
+        self.save()
+
 
 class Ruta(models.Model):
 
@@ -76,12 +89,12 @@ class Ruta(models.Model):
 
     salida = models.DateTimeField()
 
-    llegada = models.DateTimeField()
+    llegada = models.DateTimeField(null=True, blank=True)
 
     def gen_asientos(self):
         """ Genera Asiento para la ruta creada """
         for identificador in range(self.bus.capacidad):
-            asiento = Asiento(ruta=self, identificador=identificador)
+            asiento = Asiento(ruta=self, identificador=(identificador + 1))
             asiento.save()
 
 
@@ -98,10 +111,11 @@ class Ruta(models.Model):
             return True
 
 
-    def save(self, *args, **kwargs):
+    def create(self):
         if self.is_valid_bus():
             self.llegada = self.salida + self.trayecto.duracion
-            super().save(*args, **kwargs)
+            self.save()
             self.gen_asientos()
+            return True
         else:
-            raise ValueError("Bus no disponible en esa fecha")
+            return False
