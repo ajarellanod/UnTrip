@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Trayecto, Ruta, Asiento
+from .models import Trayecto, Ruta, Asiento, Bus, Chofer, Pasajero
 
 
 class TrayectoSerializer(serializers.ModelSerializer):
@@ -19,12 +19,34 @@ class TrayectoSerializer(serializers.ModelSerializer):
 class AsientoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Asiento
+        exclude = ['ruta']
+
+
+class ChoferSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Chofer
+        fields = '__all__'
+
+
+class BusSerializer(serializers.ModelSerializer):
+
+    chofer_nombre = serializers.CharField(source="chofer.nombre", read_only=True)
+
+    class Meta:
+        model = Bus
+        fields = '__all__'
+
+
+class PasajeroSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pasajero
         fields = '__all__'
 
 
 class RutaSerializer(serializers.ModelSerializer):
     
     asientos = AsientoSerializer(many=True, read_only=True)
+    info_bus = BusSerializer(source="bus", read_only=True)
 
     class Meta:
         model = Ruta

@@ -5,8 +5,15 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import Trayecto, Ruta, Asiento
-from .serializers import TrayectoSerializer, RutaSerializer, AsientoSerializer
+from .models import Trayecto, Ruta, Asiento, Bus, Pasajero, Chofer
+from .serializers import (
+    TrayectoSerializer,
+    RutaSerializer,
+    AsientoSerializer,
+    BusSerializer,
+    ChoferSerializer,
+    PasajeroSerializer,
+)
 
 
 class TrayectoViewSet(viewsets.ModelViewSet):
@@ -23,9 +30,30 @@ class RutaViewSet(viewsets.ModelViewSet):
         ruta = self.get_object()
         asiento = ruta.asientos.get(identificador=identificador)
         asiento.reservar()
-        return Response({"message": "Asiento reservado correctamente"})
+        return Response({"message": "Asiento Reservado Correctamente"})
 
 
 class AsientoViewSet(viewsets.ModelViewSet):
     queryset = Asiento.objects.all()
     serializer_class = AsientoSerializer
+
+
+class BusViewSet(viewsets.ModelViewSet):
+    queryset = Bus.objects.all()
+    serializer_class = BusSerializer
+
+
+class ChoferViewSet(viewsets.ModelViewSet):
+    queryset = Chofer.objects.all()
+    serializer_class = ChoferSerializer
+
+    @action(detail=False, methods=['get'])
+    def disponibles(self, request):
+        queryset = Chofer.objects.filter(bus=None)
+        serializer = ChoferSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class PasajeroViewSet(viewsets.ModelViewSet):
+    queryset = Pasajero.objects.all()
+    serializer_class = PasajeroSerializer

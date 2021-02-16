@@ -2,32 +2,29 @@ from django.db import models
 from django.db.models import Q, F
 
 
-class Ticket(models.Model):
+class Chofer(models.Model):
 
-    pasajero = models.CharField(max_length=100)
+    nombre = models.CharField(max_length=100)
 
-    asiento = models.ForeignKey(
-        'Asiento',
-        on_delete=models.CASCADE,
-        related_name="tickets"
-    )
+    edad = models.IntegerField()
+
+    class Meta:
+        verbose_name_plural = "Choferes"
+
+
+class Pasajero(models.Model):
+
+    nombre = models.CharField(max_length=100)
+
+    identificacion = models.IntegerField()
 
 
 class Bus(models.Model):
 
-    DISPONIBLE = 1
-    EN_RUTA = 2
-    
-    ESTADOS = (
-        (DISPONIBLE, "Disponible"),
-        (EN_RUTA, "En Ruta")
+    chofer = models.OneToOneField(
+        'Chofer',
+        on_delete=models.CASCADE,
     )
-
-    estado = models.IntegerField(
-        choices=ESTADOS, default=DISPONIBLE
-    )
-
-    chofer = models.CharField(max_length=100)
 
     capacidad = models.IntegerField()
 
@@ -53,12 +50,17 @@ class Asiento(models.Model):
     DISPONIBLE = 1
     RESERVADO = 2
 
-    identificador = models.IntegerField()
-
     ESTADOS = (
         (DISPONIBLE, "Disponible"),
         (RESERVADO, "Reservado")
     )
+
+    estado = models.IntegerField(
+        choices=ESTADOS,
+        default=DISPONIBLE
+    )
+
+    identificador = models.IntegerField()
 
     ruta = models.ForeignKey(
         'Ruta',
@@ -66,7 +68,12 @@ class Asiento(models.Model):
         related_name="asientos"
     )
 
-    estado = models.IntegerField(choices=ESTADOS, default=DISPONIBLE)
+    pasajero = models.OneToOneField(
+        'Pasajero',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
 
     def reservar(self):
         self.estado = self.RESERVADO
@@ -91,10 +98,14 @@ class Ruta(models.Model):
 
     llegada = models.DateTimeField(null=True, blank=True)
 
+
     def gen_asientos(self):
-        """ Genera Asiento para la ruta creada """
+        """ Genera Asientos para la ruta creada """
         for identificador in range(self.bus.capacidad):
-            asiento = Asiento(ruta=self, identificador=(identificador + 1))
+            asiento = Asiento(
+                ruta=self,
+                identificador=identificador + 1
+            )
             asiento.save()
 
 
