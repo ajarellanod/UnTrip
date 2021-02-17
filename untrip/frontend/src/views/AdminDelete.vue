@@ -17,7 +17,6 @@
                             </div>
                             <div class="forms">
                                 <form @submit.prevent v-show="actualOption == form.name" v-for="form in forms" :key="form.name">
-
                                     <!-- Principal Field -->
                                    <div class="field">
                                         <label class="label">
@@ -34,26 +33,7 @@
                                             </select>
                                           </div>
                                     </div>
-
-                                  <!-- Fields -->
-                                  <div class="field" v-for="field in form.fields" :key="field.name">
-                                    <label class="label">{{field.label}}</label>
-                                    
-                                    <div class="control">
-                                      <!-- Input -->
-                                      <input v-if="field.type != 'select'" class="input" v-model="field.data" :type="field.type" :name="field.name" :placeholder="field.placeholder">
-
-                                      <!-- Or Select -->
-                                      <div v-else class="select is-fullwidth">
-                                        <select v-model="field.data" :name="field.name">
-                                          <option v-for="option in getSelectOptions(field.options)" :value="option.id" :key="option.id">
-                                              {{ option[field.attr] }}
-                                          </option>
-                                        </select>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <button @click="sendForm(form)" class="button is-primary">Actualizar</button>
+                                  <button @click="sendForm(form)" class="button is-danger">Eliminar</button>
                                 </form>
                             </div>
                         </div>
@@ -70,7 +50,7 @@ import { getAPI } from "@/axios-api";
 import Swal from 'sweetalert2';
 
 export default {
-    name: 'AdminUpdate',
+    name: 'AdminDelete',
     data () {
         return {
             APIData: {
@@ -94,23 +74,7 @@ export default {
                         attr: "nombre",
                         name: "trayecto",
                         data: ""
-                    },
-                    fields: [
-                        {
-                            label: "Nombre del Trayecto",
-                            type: "text",
-                            placeholder: "Ingrese Nombre",
-                            name: "nombre",
-                            data: ""
-                        },
-                        {
-                            label: "Duración del Trayecto",
-                            type: "text",
-                            placeholder: "2 00:01:30",
-                            name: "duracion",
-                            data: ""
-                        },
-                    ]
+                    }
                 },
                 {   
                     name: 'Ruta',
@@ -122,32 +86,7 @@ export default {
                         attr: "id",
                         name: "ruta",
                         data: ""
-                    },
-                    fields: [
-                        {
-                            label: "Hora de Salida",
-                            type: "datetime-local",
-                            placeholder: "",
-                            name: "salida",
-                            data: ""
-                        },
-                        {
-                            label: "Seleccione Trayecto",
-                            type: "select",
-                            options: "trayectos",
-                            attr: "nombre",
-                            name: "trayecto",
-                            data: ""
-                        },
-                        {
-                            label: "Seleccione Bus",
-                            type: "select",
-                            options: "buses",
-                            attr: "chofer_nombre",
-                            name: "bus",
-                            data: ""
-                        },
-                    ]
+                    }
                 },
                 {   
                     name: 'Chofer',
@@ -159,23 +98,7 @@ export default {
                         attr: "nombre",
                         name: "chofer",
                         data: ""
-                    },
-                    fields: [
-                        {
-                            label: "Nombre del Chofer",
-                            type: "text",
-                            placeholder: "Agrege Chofer",
-                            name: "nombre",
-                            data: ""
-                        },
-                        {
-                            label: "Edad del Chofer",
-                            type: "number",
-                            placeholder: "Agrege Edad",
-                            name: "edad",
-                            data: 18
-                        },
-                    ]
+                    }
                 },
                 {   
                     name: 'Pasajero',
@@ -187,23 +110,7 @@ export default {
                         attr: "nombre",
                         name: "pasajero",
                         data: ""
-                    },
-                    fields: [
-                        {
-                            label: "Nombre del Pasajero",
-                            type: "text",
-                            placeholder: "Agrege Nombre",
-                            name: "nombre",
-                            data: ""
-                        },
-                        {
-                            label: "Identificación",
-                            type: "number",
-                            placeholder: "Agrege Identificación",
-                            name: "identificacion",
-                            data: ""
-                        },
-                    ]
+                    }
                 },
                 {   
                     name: 'Bus',
@@ -215,24 +122,7 @@ export default {
                         attr: "chofer_nombre",
                         name: "bus",
                         data: ""
-                    },
-                    fields: [
-                        {
-                            label: "Seleccione Chofer",
-                            type: "select",
-                            options: "choferes",
-                            attr: "nombre",
-                            name: "chofer",
-                            data: ""
-                        },
-                        {
-                            label: "Capacidad del Bus",
-                            type: "number",
-                            placeholder: "Agrege Capacidad",
-                            name: "capacidad",
-                            data: 10
-                        },
-                    ]
+                    }
                 }
             ]
         }
@@ -248,10 +138,10 @@ export default {
             let vm = this;
             for (let key in vm.APIData) {
                 getAPI.get(vm.APIData[key].path)
-                  .then(response => {
+                  .then((response) => {
                     vm.APIData[key].data = response.data;
                   })
-                  .catch(err => {
+                  .catch((err) => {
                     console.log(err)
                   })
 
@@ -279,25 +169,19 @@ export default {
               }) 
         },
         sendForm (form){
-            let output = {};
             let path = `${form.path}${form.principal.data}/`
-            
-            for (let field in form.fields) {
-                output[form.fields[field].name] = form.fields[field].data;
-                form.fields[field].data = "";
-            }
 
-            getAPI.put(path, output)
+            getAPI.delete(path)
              .then(() => {
                 Swal.fire(
-                  'Actualizado Exitosamente!',
+                  'Se Elimino Correctamente!',
                   `Formulario ${form.name}`,
                   'success'
                 )
              })
              .catch(() => {
                 Swal.fire(
-                  'Falló al Guardar',
+                  'Falló al Eliminar',
                   `Formulario ${form.name}`,
                   'error'
                 )

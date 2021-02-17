@@ -29,7 +29,11 @@
                                             Actualización
                                         </router-link>
                                     </li>
-                                    <li><a>Eliminación</a></li>
+                                    <li>
+                                        <router-link to="/admin/delete">
+                                            Eliminación
+                                        </router-link>
+                                    </li>
                                     <li>
                                         <router-link to="/">
                                             Inicio
@@ -63,6 +67,6 @@
     }
 
     .hero-body, .hero-foot {
-        background: #3273dc;
+        background: #dbdbdb;
     }
 </style>

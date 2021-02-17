@@ -30,6 +30,12 @@ const routes = [
     name: "AdminUpdate",
     component: () =>
       import("../views/AdminUpdate.vue")
+  },
+  {
+    path: "/admin/delete",
+    name: "AdminDelete",
+    component: () =>
+      import("../views/AdminDelete.vue")
   }
 ];
 
