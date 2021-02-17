@@ -143,7 +143,6 @@ export default {
                 getAPI.get(path)
                   .then(response => {
                     vm.rutasActuales.push(response.data);
-                    console.log(response.data);
                   })
                   .catch(err => {
                     console.log(err)

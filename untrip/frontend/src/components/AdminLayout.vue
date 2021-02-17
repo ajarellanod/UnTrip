@@ -20,17 +20,21 @@
                             <div class="tabs is-right">
                                 <ul>
                                     <li>
-                                        <router-link to="/">
+                                        <router-link to="/admin/create">
                                             Creación
                                         </router-link>
                                     </li>
                                     <li>
-                                        <router-link to="/trayectos">
+                                        <router-link to="/admin/update">
                                             Actualización
                                         </router-link>
                                     </li>
                                     <li><a>Eliminación</a></li>
-                                    <li><a>Visualización</a></li>
+                                    <li>
+                                        <router-link to="/">
+                                            Inicio
+                                        </router-link>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
