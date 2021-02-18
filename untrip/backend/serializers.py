@@ -19,7 +19,7 @@ class TrayectoSerializer(serializers.ModelSerializer):
 class AsientoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Asiento
-        exclude = ['ruta']
+        fields = '__all__'
 
 
 class ChoferSerializer(serializers.ModelSerializer):

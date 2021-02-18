@@ -123,6 +123,18 @@ export default {
                         name: "bus",
                         data: ""
                     }
+                },
+                {   
+                    name: 'Asiento',
+                    path: '/asientos/',
+                    principal: {
+                        label: "Seleccione Asiento",
+                        type: "select",
+                        options: "asientos",
+                        attr: "id",
+                        name: "asiento",
+                        data: ""
+                    }
                 }
             ]
         }

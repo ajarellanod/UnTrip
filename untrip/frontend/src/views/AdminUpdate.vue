@@ -233,6 +233,43 @@ export default {
                             data: 10
                         },
                     ]
+                },
+                {   
+                    name: 'Asiento',
+                    path: '/asientos/',
+                    principal: {
+                        label: "Seleccione Asiento",
+                        type: "select",
+                        options: "asientos",
+                        attr: "id",
+                        name: "asiento",
+                        data: ""
+                    },
+                    fields: [
+                        {
+                            label: "Pasajero Asignado",
+                            type: "select",
+                            options: "pasajeros",
+                            attr: "nombre",
+                            name: "pasajero",
+                            data: ""
+                        },
+                        {
+                            label: "Ruta Asignada (No debe ser cambiado)",
+                            type: "select",
+                            options: "rutas",
+                            attr: "id",
+                            name: "ruta",
+                            data: ""
+                        },
+                        {
+                            label: "Identificación del Asiento (No debe ser cambiado)",
+                            type: "number",
+                            placeholder: "Agrege identificador",
+                            name: "identificador",
+                            data: ""
+                        },
+                    ]
                 }
             ]
         }
