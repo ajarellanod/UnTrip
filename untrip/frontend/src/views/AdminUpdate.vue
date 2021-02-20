@@ -7,53 +7,73 @@
                         <div class="box">
                             <div class="tabs is-centered is-boxed">
                               <ul>
-                                <li v-for="option in formsOptions" :key="option"
-                                :class="{ 'is-active': actualOption === option }"
-                                @click="setOption(option)"
+                                <li 
+                                v-for="form in forms" 
+                                :key="form.name"
+                                :class="{ 'is-active': actualForm === form.name }"
+                                @click="setOption(form)"
                                 >
-                                    <a>{{option}}</a>
+                                    <a>{{form.name}}</a>
                                 </li>
                               </ul>
                             </div>
                             <div class="forms">
-                                <form @submit.prevent v-show="actualOption == form.name" v-for="form in forms" :key="form.name">
+                                <form 
+                                @submit.prevent 
+                                v-show="actualForm == form.name" 
+                                v-for="form in forms" 
+                                :key="form.name">
 
-                                    <!-- Principal Field -->
+                                  <!-- Principal Field -->
                                    <div class="field">
-                                        <label class="label">
-                                            {{form.principal.label}}
-                                        </label>                                 
-                                          <div class="select is-fullwidth">
-                                            <select v-model="form.principal.data" @change="getObject(form)" :name="form.principal.name">
-                                                <option 
-                                                  v-for="option in getSelectOptions(form.principal.options)" 
-                                                  :value="option.id" 
-                                                  :key="option.id">
-                                                    {{ option[form.principal.attr] }}
-                                                </option>
-                                            </select>
-                                          </div>
+                                      <label class="label">
+                                        {{form.principal.label}}
+                                      </label>                                 
+                                      <div class="select is-fullwidth">
+                                        <select 
+                                        v-model="form.principal.data" 
+                                        @change="getPrincipal(form)" 
+                                        :name="form.principal.name">
+                                            <option 
+                                              v-for="option in getSelectOptions(form.principal.options)" 
+                                              :value="option.id" 
+                                              :key="option.id">
+                                                {{ option[form.principal.attr] }}
+                                            </option>
+                                        </select>
+                                      </div>
                                     </div>
 
                                   <!-- Fields -->
                                   <div class="field" v-for="field in form.fields" :key="field.name">
-                                    <label class="label">{{field.label}}</label>
-                                    
+                                    <label class="label">
+                                        {{field.label}}
+                                    </label>
                                     <div class="control">
-                                      <!-- Input -->
-                                      <input v-if="field.type != 'select'" class="input" v-model="field.data" :type="field.type" :name="field.name" :placeholder="field.placeholder">
-
-                                      <!-- Or Select -->
+                                      <input 
+                                      class="input" 
+                                      v-model="field.data" 
+                                      :type="field.type" 
+                                      :name="field.name" 
+                                      :placeholder="field.placeholder"
+                                      v-if="!field.options" 
+                                      />
                                       <div v-else class="select is-fullwidth">
                                         <select v-model="field.data" :name="field.name">
-                                          <option v-for="option in getSelectOptions(field.options)" :value="option.id" :key="option.id">
+                                          <option 
+                                          v-for="option in getSelectOptions(field.options)" 
+                                          :value="option.id" 
+                                          :key="option.id"
+                                          >
                                               {{ option[field.attr] }}
                                           </option>
                                         </select>
                                       </div>
                                     </div>
                                   </div>
-                                  <button @click="sendForm(form)" class="button is-primary">Actualizar</button>
+                                  <button @click="sendFormData(form)" class="button is-primary">
+                                    Actualizar
+                                  </button>
                                 </form>
                             </div>
                         </div>
@@ -81,8 +101,7 @@ export default {
                 "pasajeros": { path: "/pasajeros/", data: [] },
                 "asientos": { path: "/asientos/", data: [] },
             },
-            formsOptions: ["Trayecto", "Chofer", "Bus", "Ruta", "Pasajero", "Asiento"],
-            actualOption: 'Trayecto',
+            actualForm: 'Trayecto',
             forms: [
                 {   
                     name: 'Trayecto',
@@ -143,7 +162,7 @@ export default {
                             label: "Seleccione Bus",
                             type: "select",
                             options: "buses",
-                            attr: "chofer_nombre",
+                            attr: "id",
                             name: "bus",
                             data: ""
                         },
@@ -212,7 +231,7 @@ export default {
                         label: "Seleccione Bus",
                         type: "select",
                         options: "buses",
-                        attr: "chofer_nombre",
+                        attr: "id",
                         name: "bus",
                         data: ""
                     },
@@ -278,50 +297,60 @@ export default {
         AdminLayout
     },
     created () {
-        this.getData();
+        let index = 0;
+        while(this.forms[index].name != this.actualForm){
+            index++;
+        }
+        this.getFieldData(this.forms[index].principal);
+        this.getFormData(this.forms[index].fields);
     },
     methods: {
-        getData(){
-            let vm = this;
-            for (let key in vm.APIData) {
-                getAPI.get(vm.APIData[key].path)
-                  .then(response => {
-                    vm.APIData[key].data = response.data;
+        getFieldData(field){
+            if (field.options) {
+                let api = this.APIData[field.options];
+                getAPI.get(api.path)
+                  .then((response) => {
+                    api.data = response.data;
                   })
-                  .catch(err => {
-                    console.log(err)
-                  })
-
-                setTimeout(()=>{console.log("Making Request...")}, 1000);
+                  .catch((error) => {
+                    console.log(error);
+                  });
             }
         },
-        setOption(option){
-            this.actualOption = option;
-            this.getData();
+        getFormData(fields){
+            for(let key in fields){
+                this.getFieldData(fields[key]);
+            }
+        },
+        setOption(form){
+            this.actualForm = form.name;
+            this.getFieldData(form.principal);
+            this.getFormData(form.fields);
         },
         getSelectOptions(name){
             return this.APIData[name].data
         },
-        getObject(form){
+        getPrincipal(form){
             let path = `${form.path}${form.principal.data}/`
-
+            let fields = form.fields;
             getAPI.get(path)
               .then((response) => {
-                for (let field in form.fields){
-                    form.fields[field].data = response.data[form.fields[field].name];
+                for (let key in fields){
+                    fields[key].data = response.data[fields[key].name];
                 }
               })
-              .catch((err) => {
-                console.log(err)
+              .catch((error) => {
+                console.log(error)
               }) 
         },
-        sendForm (form){
+        sendFormData(form){
             let output = {};
             let path = `${form.path}${form.principal.data}/`
+            let fields = form.fields;
             
-            for (let field in form.fields) {
-                output[form.fields[field].name] = form.fields[field].data;
-                form.fields[field].data = "";
+            for (let key in fields) {
+                output[fields[key].name] = fields[key].data;
+                fields[key].data = "";
             }
 
             getAPI.put(path, output)

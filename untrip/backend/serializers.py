@@ -11,9 +11,14 @@ class TrayectoSerializer(serializers.ModelSerializer):
         view_name='ruta-detail'
     )
 
+    promedio_pasajeros = serializers.SerializerMethodField()
+
     class Meta:
         model = Trayecto
         fields = '__all__'
+
+    def get_promedio_pasajeros(self, obj):
+        return obj.promedio_pasajeros()
 
 
 class AsientoSerializer(serializers.ModelSerializer):
@@ -30,7 +35,10 @@ class ChoferSerializer(serializers.ModelSerializer):
 
 class BusSerializer(serializers.ModelSerializer):
 
-    chofer_nombre = serializers.CharField(source="chofer.nombre", read_only=True)
+    chofer_nombre = serializers.CharField(
+        source="chofer.nombre",
+        read_only=True
+    )
 
     class Meta:
         model = Bus
@@ -53,9 +61,9 @@ class RutaSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        ruta = Ruta(**validated_data)
-        if ruta.create():
+        try:
+            ruta = Ruta.objects.create(**validated_data)
+            ruta.crear_asientos()
             return ruta
-        else:
-            error = {'error': 'Bus is not available'}
+        except Exception as error:
             raise serializers.ValidationError(error)

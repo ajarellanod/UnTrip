@@ -4,62 +4,62 @@
             <div class="container">
                 <div class="columns">
                     <div class="column is-5">
-                        <article class="panel is-link">
-                          <p class="panel-heading logo">
-                            Trayectos
-                          </p>
-                          <p class="panel-tabs">
-                            <a v-for="option in filterOptions" :key="option"
-                            :class="{ 'is-active': actualOption === option }"
-                            @click="getFilterOptions(option)"
+                      <div class="box panel is-link">
+                        <p class="panel-heading logo">
+                          Trayectos
+                        </p>
+                        <table class="table is-fullwidth is-hoverable">
+                          <thead>
+                            <tr>
+                              <th>Nombre</th>
+                              <th>
+                                Promedio de Pasajeros <br>
+                                <span class="content is-small">
+                                  Por Cada Ruta
+                                </span>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="trayecto in APIData" :key="trayecto.id" 
+                            @click="setTrayecto(trayecto)" 
                             >
-                                {{option}}
-                            </a>
-                          </p>
-                          <div class="panel-block">
-                            <p class="control has-icons-left">
-                              <input class="input is-link" type="text" placeholder="Search">
-                              <span class="icon is-left">
-                                <i class="fas fa-search" aria-hidden="true"></i>
-                              </span>
-                            </p>
-                          </div>
-                          <a v-for="trayecto in APIData" :key="trayecto.id" @click="getRutas(trayecto)" class="panel-block is-active">
-                            <span class="panel-icon">
-                              <i class="fas fa-book" aria-hidden="true"></i>
-                            </span>
-                            {{ trayecto.nombre }}
-                          </a>
-                          <div class="panel-block">
-                            <nav class="pagination" role="navigation" aria-label="pagination">
-                                <a class="pagination-previous button is-link is-outlined">
-                                    <i class="fas fa-caret-left" aria-hidden="true"></i>
-                                </a>
-                                <a class="pagination-next button is-link is-outlined">
-                                    <i class="fas fa-caret-right" aria-hidden="true"></i>
-                                </a>
-                                <ul class="pagination-list">
-                                </ul>
-                            </nav>
-                          </div>
-                        </article>
+                              <th><a>{{ trayecto.nombre }}</a></th>
+                              <td>{{ trayecto.promedio_pasajeros }}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                     <div class="column is-7">
-                        <h3 v-if="trayectoActual == ''" class="title is-3 has-text-centered logo">
-                            Seleccione Un Trayecto
-                            <br>
-                            <span class="content is-small">Para Ver Rutas Disponibles</span>
-                        </h3>
-                        <h3 v-if="rutasActuales.length != 0" class="title is-3 has-text-centered logo">
-                            Rutas Disponibles
-                            <br>
-                            <span class="content is-small">{{ trayectoActual }}</span>
-                        </h3>
-                        <h3 v-else-if="rutasActuales.length == 0 & trayectoActual != ''" class="title is-3 has-text-centered logo">
-                            Trayecto Sin Rutas Disponibles
-                            <br>
-                            <span class="content is-small">{{ trayectoActual }}</span>
-                        </h3>
+                          <!-- Titulos -->
+                          <h3 v-if="nombreActual == ''" class="title is-3 has-text-centered logo">
+                              Seleccione Un Trayecto<br>
+                              <span class="content is-small">Para Ver Rutas Disponibles</span>
+                          </h3>
+                          <h3 v-if="rutasActuales.length != 0" class="title is-3 has-text-centered logo">
+                              Rutas Disponibles<br>
+                              <span class="content is-small">{{ nombreActual }}</span>
+                          </h3>
+                          <h3 v-else-if="rutasActuales.length == 0 & nombreActual != ''" class="title is-3 has-text-centered logo">
+                              Ninguna Ruta Disponible<br>
+                              <span class="content is-small">{{ nombreActual }}</span>
+                          </h3>
+                          <!-- Titulos -->
+
+                        <div class="field has-addons">
+                          <div class="control is-expanded">
+                            <input class="input is-link" v-model="porcentaje" type="text" 
+                            placeholder="Filtra Rutas">
+                          </div>
+                          <div class="control">
+                            <a @click="filtrarRutas()" class="button is-link">
+                              Filtrar
+                            </a>
+                          </div>
+                        </div><br>
+                        
+                        <!-- Rutas -->
                         <div class="columns is-flex is-flex-wrap-wrap">
                             <div v-for="ruta in rutasActuales" :key="ruta.id" class="column is-6">
                                 <div class="box">
@@ -90,11 +90,7 @@
                                             <span class="icon is-small" title="Reservar">
                                               <i class="fas fa-suitcase" aria-hidden="true"></i>
                                             </span>
-                                          </a>
-                                          <a class="level-item" aria-label="retweet">
-                                            <span class="icon is-small" title="Obten Información">
-                                              <i class="fas fa-info" aria-hidden="true"></i>
-                                            </span>
+                                            &nbsp;Reserva
                                           </a>
                                         </div>
                                       </nav>
@@ -120,39 +116,51 @@ export default {
         return {
             APIData: [],
             rutasActuales: [],
+            nombreActual: '',
             trayectoActual: '',
-            filterOptions: ['Todos', 'Largos', 'Cortos'],
-            actualOption: 'Todos'
+            porcentaje: 0,
         }
     },
     created () {
         getAPI.get("/trayectos/")
-          .then(response => {
+          .then((response) => {
             this.APIData = response.data
           })
-          .catch(err => {
-            console.log(err)
+          .catch((error) => {
+            console.log(error)
           })
     },
     methods: {
-        getRutas(trayecto){
-            let vm = this;
-            vm.trayectoActual = trayecto.nombre;
-            vm.rutasActuales = [];
-            trayecto.rutas.forEach(function (path){
-                getAPI.get(path)
-                  .then(response => {
-                    vm.rutasActuales.push(response.data);
-                  })
-                  .catch(err => {
-                    console.log(err)
-                  })
-            });
-        },
-        asientosDisponibles(ruta){
-            let asientos = ruta.asientos.filter(asiento => asiento.estado == 1);
-            return asientos.length
+      setTrayecto(trayecto){
+        this.trayectoActual = trayecto;
+        this.nombreActual = trayecto.nombre;
+        this.porcentaje = 0;
+        this.getRutas();
+      },
+      filtrarRutas(){
+        if (this.porcentaje == ''){
+          this.porcentaje = 0;
+        }else if(this.porcentaje >= 100){
+           this.porcentaje = 100;
         }
+        this.getRutas();
+      },
+      asientosDisponibles(ruta){
+        return ruta.asientos.filter(
+          asiento => asiento.estado == 1
+        ).length;
+      },
+      getRutas(){
+        let vm = this;
+        let path = `/trayectos/${vm.trayectoActual.id}/rutas/${vm.porcentaje}/`
+        getAPI.get(path)
+          .then((response) => {
+            vm.rutasActuales = response.data;
+          })
+          .catch((error) => {
+            console.log(error)
+          });
+      }
     },
     components: {
         Layout

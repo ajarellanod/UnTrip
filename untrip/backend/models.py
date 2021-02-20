@@ -1,5 +1,7 @@
+from decimal import Decimal
+
 from django.db import models
-from django.db.models import Q, F, Max
+from django.db.models import Q, F, Avg, Count, ExpressionWrapper, FloatField
 
 
 class Chofer(models.Model):
@@ -28,21 +30,8 @@ class Bus(models.Model):
 
     capacidad = models.IntegerField()
 
-    def __str__(self):
-        return f"Bus({self.chofer})"
-
     class Meta:
         verbose_name_plural = "Buses"
-
-
-class Trayecto(models.Model):
-    
-    nombre = models.CharField(max_length=100)
-
-    duracion = models.DurationField()
-
-    def __str__(self):
-        return f"Trayecto({self.nombre})"
 
 
 class Asiento(models.Model):
@@ -68,16 +57,26 @@ class Asiento(models.Model):
         related_name="asientos"
     )
 
-    pasajero = models.OneToOneField(
+    pasajero = models.ForeignKey(
         'Pasajero',
         on_delete=models.CASCADE,
         null=True,
         blank=True
     )
 
-    def reservar(self):
-        self.estado = self.RESERVADO
-        self.save()
+    def reservar(self, pasajero):
+        self.pasajero = pasajero
+
+    def save(self, *args, **kwargs):
+        if self.pasajero:
+            self.estado = self.RESERVADO
+        super().save(*args, **kwargs)
+
+    class Meta:   
+        constraints = [
+            models.UniqueConstraint(fields=['ruta', 'pasajero'], name='unique-pasajero')
+        ]
+        
 
 
 class Ruta(models.Model):
@@ -99,21 +98,20 @@ class Ruta(models.Model):
     llegada = models.DateTimeField(null=True, blank=True)
 
 
-    def gen_asientos(self):
-        """ Genera Asientos para la ruta creada """
-        for identificador in range(self.bus.capacidad):
-            asiento = Asiento(
-                ruta=self,
-                identificador=identificador + 1
-            )
-            asiento.save()
+    def crear_asientos(self):
+        for idt in range(self.bus.capacidad):
+            Asiento.objects.create(ruta=self, identificador=idt+1)
 
 
-    def is_valid_bus(self):
-        """ Valida que el Bus tenga disponibilidad """
+    def es_valido_bus(self):
+        """ 
+        Valida que el bus tenga disponibilidad
+        en una fecha y hora en particular.
+        """
         query = Ruta.objects.filter(
-            Q(bus=self.bus),
-            Q(llegada__gte=self.salida),
+            bus=self.bus,
+            llegada__gte=self.salida,
+            salida__lte=self.salida,
         )
 
         if query.first():
@@ -122,11 +120,37 @@ class Ruta(models.Model):
             return True
 
 
-    def create(self):
-        if self.is_valid_bus():
-            self.llegada = self.salida + self.trayecto.duracion
-            self.save()
-            self.gen_asientos()
-            return True
+    def save(self, *args, **kwargs):
+        if self.es_valido_bus():
+            self.llegada = self.trayecto.duracion + self.salida
+            super().save(*args, **kwargs)
         else:
-            return False
+            raise ValueError("Bus No Disponible")
+
+
+class Trayecto(models.Model):
+    
+    nombre = models.CharField(max_length=100)
+
+    duracion = models.DurationField()
+
+    def promedio_pasajeros(self):
+        """
+        Calcula el promedio de Pasajeros
+        en un Trayecto por cada Ruta Existente.
+        """
+        query = self.rutas.annotate(
+            pasajeros=Count(
+                "asientos",
+                filter=Q(
+                    asientos__estado=Asiento.RESERVADO
+                )
+            )
+        ).aggregate(Avg("pasajeros"))
+
+        result = query["pasajeros__avg"]
+        
+        if result is not None:
+            return round(result, 2)
+        else:
+            return 0.0
