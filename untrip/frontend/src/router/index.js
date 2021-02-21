@@ -21,6 +21,12 @@ const routes = [
     props: true,
   },
   {
+    path: "/admin",
+    name: "AdminCreate",
+    component: () =>
+      import("../views/AdminCreate.vue")
+  },
+  {
     path: "/admin/create",
     name: "AdminCreate",
     component: () =>

@@ -42,3 +42,9 @@
 
 * Desde la segunda cmd creada que se encuentra en la dirección `UnTrip/untrip/fronted` corre los siguientes comandos
 * > `npm run serve`
+
+### Visualiza el Proyecto
+
+* Abre tu navegador
+* Ingresa a `http://localhost:8080/` para la vista de usuario
+* Ingresa a `http://localhost:8080/admin` para la vista de administrador
