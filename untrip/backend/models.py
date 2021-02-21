@@ -51,6 +51,8 @@ class Asiento(models.Model):
 
     identificador = models.IntegerField()
 
+    codigo = models.CharField(max_length=6)
+
     ruta = models.ForeignKey(
         'Ruta',
         on_delete=models.CASCADE,
@@ -64,8 +66,19 @@ class Asiento(models.Model):
         blank=True
     )
 
+    def genera_codigo(self):
+        codigo = 7410 * (self.identificador * self.pasajero.id + self.ruta.id)
+        return str(codigo)[::-1][:6]
+
+    def verifica_ruta(self):
+        query = Asiento.objects.filter(ruta=self.ruta, estado=self.DISPONIBLE)
+        if not query.first():
+            self.ruta.no_disponible()
+
     def reservar(self, pasajero):
         self.pasajero = pasajero
+        self.codigo = self.genera_codigo()
+        self.verifica_ruta()
 
     def save(self, *args, **kwargs):
         if self.pasajero:
@@ -80,6 +93,8 @@ class Asiento(models.Model):
 
 
 class Ruta(models.Model):
+
+    disponible = models.BooleanField(default=True)
 
     trayecto = models.ForeignKey(
         'Trayecto',
@@ -119,6 +134,9 @@ class Ruta(models.Model):
         else:
             return True
 
+    def no_disponible(self):
+        self.disponible = False
+        super().save(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         if self.es_valido_bus():

@@ -1,4 +1,5 @@
 from decimal import Decimal
+from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
@@ -32,11 +33,15 @@ class TrayectoViewSet(viewsets.ModelViewSet):
         de ocupación mayor que el indicado
         """
         trayecto = self.get_object()
+        query = trayecto.rutas.filter(
+            disponible=True,
+            salida__gte=datetime.now()
+        )
 
         if porcentaje is not None:
             porcentaje_real = round(float(porcentaje) / 100, 2)
 
-            query = trayecto.rutas.annotate(
+            query = query.annotate(
                 reservados=Count(
                     "asientos",
                     filter=Q(
@@ -53,7 +58,7 @@ class TrayectoViewSet(viewsets.ModelViewSet):
 
             queryset = query.filter(porcentaje__gte=porcentaje_real)
         else:
-            queryset = trayecto.rutas.get_queryset()
+            queryset = query.get_queryset()
 
         serializer = RutaSerializer(queryset, many=True)
         return Response(serializer.data)
@@ -62,7 +67,14 @@ class TrayectoViewSet(viewsets.ModelViewSet):
 class RutaViewSet(viewsets.ModelViewSet):
     queryset = Ruta.objects.all()
     serializer_class = RutaSerializer
- 
+
+    @action(detail=True, methods=['get'])
+    def asientos(self, request, pk=None):
+        ruta = self.get_object()
+        asientos = ruta.asientos.filter(estado=Asiento.DISPONIBLE)
+        serializer = AsientoSerializer(asientos, many=True)
+        return Response(serializer.data)
+
     @action(detail=True, 
             methods=['post'], 
             url_path="reservar/(?P<idt>[^/.]+)")

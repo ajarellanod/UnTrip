@@ -86,12 +86,12 @@
                                       </div>
                                       <nav class="level is-mobile">
                                         <div class="level-left">
-                                          <a class="level-item" aria-label="reply">
+                                          <router-link :to="'/reserva/' + ruta.id" class="level-item" aria-label="reply">
                                             <span class="icon is-small" title="Reservar">
                                               <i class="fas fa-suitcase" aria-hidden="true"></i>
                                             </span>
                                             &nbsp;Reserva
-                                          </a>
+                                          </router-link>
                                         </div>
                                       </nav>
                                     </div>
@@ -167,10 +167,3 @@ export default {
     }
 };
 </script>
-
-
-<style scoped>
-    .box {
-        margin-top: 0rem;
-    }
-</style>

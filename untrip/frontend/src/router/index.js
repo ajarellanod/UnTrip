@@ -14,10 +14,11 @@ const routes = [
       import("../views/Trayectos.vue")
   },
   {
-    path: "/about",
-    name: "About",
+    path: "/reserva/:rutaId",
+    name: "Reserva",
     component: () =>
-      import("../views/About.vue")
+      import("../views/Reserva.vue"),
+    props: true,
   },
   {
     path: "/admin/create",

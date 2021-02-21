@@ -84,9 +84,9 @@ export default {
                     path: '/trayectos/',
                     fields: [
                         {
-                            label: "Nombre del Trayecto",
+                            label: "Dirección del Trayecto",
                             type: "text",
-                            placeholder: "Ingrese Nombre",
+                            placeholder: "Venezuela - Chile",
                             name: "nombre",
                             data: ""
                         },
@@ -144,7 +144,8 @@ export default {
                             type: "number",
                             placeholder: "Agrege Edad",
                             name: "edad",
-                            data: 18
+                            data: 18,
+                            fixed: 18
                         },
                     ]
                 },
@@ -185,7 +186,8 @@ export default {
                             type: "number",
                             placeholder: "Agrege Capacidad",
                             name: "capacidad",
-                            data: 10
+                            data: 10,
+                            fixed: 10
                         },
                     ]
                 }
@@ -233,7 +235,13 @@ export default {
 
             for (let key in fields) {
                 output[fields[key].name] = fields[key].data;
-                fields[key].data = "";
+                
+                // Limpiando los inputs
+                if(fields[key].fixed){
+                    fields[key].data = fields[key].fixed;
+                }else{
+                    fields[key].data = "";
+                } 
             }
 
             getAPI.post(form.path, output)

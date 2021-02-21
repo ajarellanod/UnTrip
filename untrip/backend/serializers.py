@@ -4,12 +4,6 @@ from .models import Trayecto, Ruta, Asiento, Bus, Chofer, Pasajero
 
 
 class TrayectoSerializer(serializers.ModelSerializer):
-    
-    rutas = serializers.HyperlinkedRelatedField(
-        many=True,
-        read_only=True,
-        view_name='ruta-detail'
-    )
 
     promedio_pasajeros = serializers.SerializerMethodField()
 
@@ -22,9 +16,17 @@ class TrayectoSerializer(serializers.ModelSerializer):
 
 
 class AsientoSerializer(serializers.ModelSerializer):
+    
+    codigo = serializers.CharField(read_only=True)
+
+    nombre = serializers.SerializerMethodField()
+    
     class Meta:
         model = Asiento
         fields = '__all__'
+
+    def get_nombre(self, obj):
+        return f"Asiento {obj.identificador} -> Ruta {obj.ruta.id}"
 
 
 class ChoferSerializer(serializers.ModelSerializer):
@@ -54,7 +56,12 @@ class PasajeroSerializer(serializers.ModelSerializer):
 class RutaSerializer(serializers.ModelSerializer):
     
     asientos = AsientoSerializer(many=True, read_only=True)
+    
     info_bus = BusSerializer(source="bus", read_only=True)
+
+    info_trayecto = TrayectoSerializer(source="trayecto", read_only=True)
+
+    disponible = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Ruta

@@ -1,87 +1,71 @@
 <template>
-    <AdminLayout>
-        <template v-slot:body>
-            <div class="container">
-                <div class="columns">
-                    <div class="column is-6 is-offset-3">
-                        <div class="box">
-                            <div class="tabs is-centered is-boxed">
-                              <ul>
-                                <li 
-                                v-for="form in forms" 
-                                :key="form.name"
-                                :class="{ 'is-active': actualForm === form.name }"
-                                @click="setOption(form)"
-                                >
-                                    <a>{{form.name}}</a>
-                                </li>
-                              </ul>
-                            </div>
-                            <div class="forms">
-                                <form 
-                                @submit.prevent 
-                                v-show="actualForm == form.name" 
-                                v-for="form in forms" 
-                                :key="form.name">
+  <AdminLayout>
+    <template v-slot:body>
+      <div class="container">
+        <div class="columns">
+          <div class="column is-6 is-offset-3">
+            <div class="box">
+              <div class="tabs is-centered is-boxed">
+                <ul>
+                  <li v-for="form in forms" @click="setOption(form)" :key="form.name"
+                  :class="{ 'is-active': actualForm === form.name }">
+                      <a>{{form.name}}</a>
+                  </li>
+                </ul>
+              </div>
+              <div class="forms">
+              <form @submit.prevent v-for="form in forms" 
+              v-show="actualForm == form.name" :key="form.name">
+                <!-- Principal Field -->
+                <div class="field">
+                  <label class="label">
+                    {{form.principal.label}}
+                  </label>                                 
+                  <div class="select is-fullwidth">
+                    <select 
+                    v-model="form.principal.data" 
+                    @change="getPrincipal(form)" 
+                    :name="form.principal.name">
+                        <option :value="option.id" :key="option.id"
+                        v-for="option in getSelectOptions(form.principal.options)" >
+                          {{ option[form.principal.attr] }}
+                        </option>
+                    </select>
+                  </div>
+                 </div>
+                  <!-- Fields -->
+                  <div class="field" v-for="field in form.fields" :key="field.name">
+                    <label class="label">
+                        {{field.label}}
+                    </label>
+                    <div class="control">
+                      
+                      <input class="input" v-model="field.data" 
+                      :type="field.type" :placeholder="field.placeholder" 
+                      v-if="field.type != 'select' & field.type != undefined" :name="field.name" />
 
-                                  <!-- Principal Field -->
-                                   <div class="field">
-                                      <label class="label">
-                                        {{form.principal.label}}
-                                      </label>                                 
-                                      <div class="select is-fullwidth">
-                                        <select 
-                                        v-model="form.principal.data" 
-                                        @change="getPrincipal(form)" 
-                                        :name="form.principal.name">
-                                            <option 
-                                              v-for="option in getSelectOptions(form.principal.options)" 
-                                              :value="option.id" 
-                                              :key="option.id">
-                                                {{ option[form.principal.attr] }}
-                                            </option>
-                                        </select>
-                                      </div>
-                                    </div>
+                      <div v-else-if="field.options" class="select is-fullwidth">
+                        <select v-model="field.data" :name="field.name">
+                          <option :value="option.id" :key="option.id"
+                          v-for="option in getSelectOptions(field.options)">
+                              {{ option[field.attr] }}
+                          </option>
+                        </select>
+                      </div>
 
-                                  <!-- Fields -->
-                                  <div class="field" v-for="field in form.fields" :key="field.name">
-                                    <label class="label">
-                                        {{field.label}}
-                                    </label>
-                                    <div class="control">
-                                      <input 
-                                      class="input" 
-                                      v-model="field.data" 
-                                      :type="field.type" 
-                                      :name="field.name" 
-                                      :placeholder="field.placeholder"
-                                      v-if="!field.options" 
-                                      />
-                                      <div v-else class="select is-fullwidth">
-                                        <select v-model="field.data" :name="field.name">
-                                          <option 
-                                          v-for="option in getSelectOptions(field.options)" 
-                                          :value="option.id" 
-                                          :key="option.id"
-                                          >
-                                              {{ option[field.attr] }}
-                                          </option>
-                                        </select>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <button @click="sendFormData(form)" class="button is-primary">
-                                    Actualizar
-                                  </button>
-                                </form>
-                            </div>
-                        </div>
                     </div>
-                </div>
+                  </div>
+                  <button @click="sendFormData(form)" class="button is-primary">
+                    Actualizar
+                  </button>
+                </form>
+              </div>
             </div>
-        </template>
-    </AdminLayout>
+          </div>
+        </div>
+      </div>
+    </template>
+  </AdminLayout>
 </template>
 
 <script>
@@ -192,7 +176,8 @@ export default {
                             type: "number",
                             placeholder: "Agrege Edad",
                             name: "edad",
-                            data: 18
+                            data: 18,
+                            fixed: 18
                         },
                     ]
                 },
@@ -249,7 +234,8 @@ export default {
                             type: "number",
                             placeholder: "Agrege Capacidad",
                             name: "capacidad",
-                            data: 10
+                            data: 10,
+                            fixed: 10
                         },
                     ]
                 },
@@ -260,7 +246,7 @@ export default {
                         label: "Seleccione Asiento",
                         type: "select",
                         options: "asientos",
-                        attr: "id",
+                        attr: "nombre",
                         name: "asiento",
                         data: ""
                     },
@@ -274,17 +260,10 @@ export default {
                             data: ""
                         },
                         {
-                            label: "Ruta Asignada (No debe ser cambiado)",
-                            type: "select",
-                            options: "rutas",
-                            attr: "id",
                             name: "ruta",
                             data: ""
                         },
                         {
-                            label: "Identificación del Asiento (No debe ser cambiado)",
-                            type: "number",
-                            placeholder: "Agrege identificador",
                             name: "identificador",
                             data: ""
                         },
@@ -347,10 +326,16 @@ export default {
             let output = {};
             let path = `${form.path}${form.principal.data}/`
             let fields = form.fields;
+            form.principal.data = '';
             
             for (let key in fields) {
                 output[fields[key].name] = fields[key].data;
-                fields[key].data = "";
+                
+                if(fields[key].fixed){
+                    fields[key].data = fields[key].fixed;
+                }else{
+                    fields[key].data = "";
+                } 
             }
 
             getAPI.put(path, output)

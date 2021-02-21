@@ -29,9 +29,6 @@
                                             Trayectos
                                         </router-link>
                                     </li>
-                                    <li><a>Nostros</a></li>
-                                    <li><a>Equipo</a></li>
-                                    <li><a>Ayuda</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -55,6 +52,10 @@
 </template>
 
 <style>
+    body{
+        background: aliceblue;
+    }
+
     .logo{
         font-family:'Reggae One', cursive;
     }
@@ -65,9 +66,6 @@
         box-shadow: -4px 5px 10px 3px rgba(102,102,102,0.4);
     }
 
-    .box {
-      margin-top: 5rem;
-    }
     .avatar {
       margin-top: -70px;
       padding-bottom: 20px;
