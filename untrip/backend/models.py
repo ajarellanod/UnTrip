@@ -123,13 +123,22 @@ class Ruta(models.Model):
         Valida que el bus tenga disponibilidad
         en una fecha y hora en particular.
         """
-        query = Ruta.objects.filter(
-            bus=self.bus,
-            llegada__gte=self.salida,
-            salida__lte=self.salida,
+        self.llegada = self.trayecto.duracion + self.salida
+
+        salida = Ruta.objects.filter(
+            Q(bus=self.bus),
+            Q(llegada__gte=self.salida),
+            Q(salida__lte=self.salida),
         )
 
-        if query.first() and query.first() != self:
+        llegada = Ruta.objects.filter(
+            Q(bus=self.bus),
+            Q(llegada__gte=self.llegada),
+            Q(salida__lte=self.llegada),
+        )
+
+        if ((salida.first() and salida.first() != self)
+        or (llegada.first() and llegada.first() != self)):
             return False
         else:
             return True
@@ -140,7 +149,6 @@ class Ruta(models.Model):
 
     def save(self, *args, **kwargs):
         if self.es_valido_bus():
-            self.llegada = self.trayecto.duracion + self.salida
             super().save(*args, **kwargs)
         else:
             raise ValueError("Bus No Disponible")

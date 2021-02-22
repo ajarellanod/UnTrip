@@ -136,9 +136,6 @@ export default {
               data: ""
             },
             {
-              label: "Duración del Trayecto",
-              type: "text",
-              placeholder: "2 00:01:30",
               name: "duracion",
               data: ""
             }
@@ -161,6 +158,13 @@ export default {
               type: "datetime-local",
               placeholder: "",
               name: "salida",
+              data: ""
+            },
+            {
+              label: "Hora de Llegada",
+              type: "datetime-local",
+              placeholder: "",
+              name: "llegada",
               data: ""
             },
             {
@@ -259,9 +263,6 @@ export default {
               data: ""
             },
             {
-              label: "Capacidad del Bus",
-              type: "number",
-              placeholder: "Agrege Capacidad",
               name: "capacidad",
               data: 10,
               fixed: 10
