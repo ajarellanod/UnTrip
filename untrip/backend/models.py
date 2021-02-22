@@ -72,7 +72,7 @@ class Asiento(models.Model):
 
     def verifica_ruta(self):
         query = Asiento.objects.filter(ruta=self.ruta, estado=self.DISPONIBLE)
-        if not query.first():
+        if query.count() == 1 and query.first() == self:
             self.ruta.no_disponible()
 
     def reservar(self, pasajero):
@@ -129,14 +129,14 @@ class Ruta(models.Model):
             salida__lte=self.salida,
         )
 
-        if query.first():
+        if query.first() and query.first() != self:
             return False
         else:
             return True
 
     def no_disponible(self):
         self.disponible = False
-        super().save(*args, **kwargs)
+        super().save()
 
     def save(self, *args, **kwargs):
         if self.es_valido_bus():

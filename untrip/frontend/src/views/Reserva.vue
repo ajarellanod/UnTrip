@@ -14,7 +14,12 @@
                     Nombre del Pasajero
                   </label>
                   <div class="control">
-                    <input placeholder="Ingrese su Nombre" type="text" class="input" v-model="form.nombre"/>
+                    <input
+                      placeholder="Ingrese su Nombre"
+                      type="text"
+                      class="input"
+                      v-model="form.nombre"
+                    />
                   </div>
                 </div>
                 <div class="field">
@@ -22,7 +27,12 @@
                     Numero de Identificación
                   </label>
                   <div class="control">
-                    <input placeholder="Ingrese su Identificación" type="text" class="input" v-model.number="form.identificacion"/>
+                    <input
+                      placeholder="Ingrese su Identificación"
+                      type="text"
+                      class="input"
+                      v-model.number="form.identificacion"
+                    />
                   </div>
                 </div>
                 <button @click="getOptions()" class="button is-link">
@@ -37,8 +47,12 @@
                   <div class="control">
                     <div class="select is-fullwidth">
                       <select v-model="asiento">
-                        <option v-for="option in selectOptions" :key="option.id" :value="option.identificador">
-                          {{option.identificador}}
+                        <option
+                          v-for="option in selectOptions"
+                          :key="option.id"
+                          :value="option.identificador"
+                        >
+                          {{ option.identificador }}
                         </option>
                       </select>
                     </div>
@@ -61,7 +75,7 @@
                         <p class="title is-5">Codigo</p>
                       </th>
                       <th>
-                        <p class="title is-5">{{objAsiento.codigo}}</p>
+                        <p class="title is-5">{{ objAsiento.codigo }}</p>
                       </th>
                     </tr>
                   </thead>
@@ -71,7 +85,7 @@
                         <p class="subtitle is-5">Trayecto</p>
                       </td>
                       <td>
-                        <p class="subtitle is-5">{{trayecto.nombre}}</p>
+                        <p class="subtitle is-5">{{ trayecto.nombre }}</p>
                       </td>
                     </tr>
                     <tr>
@@ -79,7 +93,7 @@
                         <p class="subtitle is-5">Pasajero</p>
                       </td>
                       <td>
-                        <p class="subtitle is-5">{{form.nombre}}</p>
+                        <p class="subtitle is-5">{{ form.nombre }}</p>
                       </td>
                     </tr>
                     <tr>
@@ -87,7 +101,7 @@
                         <p class="subtitle is-5">Fecha</p>
                       </td>
                       <td>
-                        <p class="subtitle is-5">{{ruta.salida}}</p>
+                        <p class="subtitle is-5">{{ ruta.salida }}</p>
                       </td>
                     </tr>
                     <tr>
@@ -95,7 +109,9 @@
                         <p class="subtitle is-5">Chofer</p>
                       </td>
                       <td>
-                        <p class="subtitle is-5">{{ruta.info_bus.chofer_nombre}}</p>
+                        <p class="subtitle is-5">
+                          {{ ruta.info_bus.chofer_nombre }}
+                        </p>
                       </td>
                     </tr>
                     <tr>
@@ -103,7 +119,9 @@
                         <p class="subtitle is-5">Numero de Asiento</p>
                       </td>
                       <td>
-                        <p class="subtitle is-5">{{objAsiento.identificador}}</p>
+                        <p class="subtitle is-5">
+                          {{ objAsiento.identificador }}
+                        </p>
                       </td>
                     </tr>
                   </tbody>
@@ -125,68 +143,70 @@ import Layout from "@/components/Layout";
 import { getAPI } from "@/axios-api";
 
 export default {
-  name: 'Reserva',
-  props: ['rutaId'],
-  data () {
+  name: "Reserva",
+  props: ["rutaId"],
+  data() {
     return {
       form: {
-        nombre: '',
-        identificacion: ''
+        nombre: "",
+        identificacion: ""
       },
       register: false,
-      objAsiento: '',
-      asiento: '',
-      ruta: '',
-      trayecto: '',
+      objAsiento: "",
+      asiento: "",
+      ruta: "",
+      trayecto: "",
       selectOptions: [],
-      mensaje: 'Llena el Formulario con tu Información!'
-    }
+      mensaje: "Llena el Formulario con tu Información!"
+    };
   },
   components: {
     Layout
   },
-  created(){
+  created() {
     let vm = this;
-    getAPI.get(`/rutas/${vm.rutaId}/`)
-      .then((response) => {
+    getAPI
+      .get(`/rutas/${vm.rutaId}/`)
+      .then(response => {
         vm.ruta = response.data;
         vm.trayecto = vm.ruta.info_trayecto;
       })
-      .catch((error) => {
+      .catch(error => {
         console.log(error);
       });
   },
-  methods:{
-    reservar(){
+  methods: {
+    reservar() {
       let vm = this;
-      getAPI.post(`/rutas/${this.rutaId}/reservar/${this.asiento}/`, this.form)
-        .then((response) => {
+      getAPI
+        .post(`/rutas/${this.rutaId}/reservar/${this.asiento}/`, this.form)
+        .then(response => {
           vm.objAsiento = response.data;
-          vm.mensaje = "Felicidades ya has reservado tu asiento!"
+          vm.mensaje = "Felicidades ya has reservado tu asiento!";
         })
         .catch(() => {
-          vm.mensaje = "Ha fallado tu registro, intentalo nuevamente."
+          vm.mensaje = "Ha fallado tu registro, intentalo nuevamente.";
         });
     },
-    getOptions(){
+    getOptions() {
       let vm = this;
-      if(vm.form.nombre == ''){
-        vm.form.nombre = 'Ingresa tu nombre!'
-      }else if(vm.form.identificacion == ''){
-        vm.form.identificacion = 'Ingresa tu numero de identificación!'
-      }else{
-        vm.register = true
-        getAPI.get(`/rutas/${vm.rutaId}/asientos/`)
-          .then((response) => {
+      if (vm.form.nombre == "") {
+        vm.form.nombre = "Ingresa tu nombre!";
+      } else if (vm.form.identificacion == "") {
+        vm.form.identificacion = "Ingresa tu numero de identificación!";
+      } else {
+        vm.register = true;
+        getAPI
+          .get(`/rutas/${vm.rutaId}/asientos/`)
+          .then(response => {
             vm.selectOptions = response.data;
-            vm.mensaje = "Ahora solo selecciona tu Asiento y habras terminado!"
+            vm.mensaje = "Ahora solo selecciona tu Asiento y habras terminado!";
           })
-          .catch((error) => {
+          .catch(error => {
             console.log(error);
           });
       }
-
-    },
+    }
   }
 };
 </script>

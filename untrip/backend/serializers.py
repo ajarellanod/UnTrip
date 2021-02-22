@@ -72,5 +72,5 @@ class RutaSerializer(serializers.ModelSerializer):
             ruta = Ruta.objects.create(**validated_data)
             ruta.crear_asientos()
             return ruta
-        except Exception as error:
+        except ValueError as error:
             raise serializers.ValidationError(error)
